@@ -1,37 +1,89 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Booking, BookingStatus } from "@/lib/api/bookings";
+import {
+  Booking,
+  BookingStatus,
+} from "@/lib/api/bookings";
 import { useUpdateBookingStatus } from "@/hooks/useTechnicianDashboard";
 
-const nextActions: Partial<Record<BookingStatus, { label: string; next: BookingStatus; variant?: "default" | "destructive" | "outline" }[]>> = {
-  REQUESTED: [
-    { label: "Accept", next: "ACCEPTED" },
-    { label: "Decline", next: "DECLINED", variant: "destructive" },
-  ],
-  PAID: [{ label: "Start Job", next: "IN_PROGRESS" }],
-  IN_PROGRESS: [{ label: "Mark Completed", next: "COMPLETED" }],
-};
+interface BookingActionsProps {
+  booking: Booking;
+}
 
-export function BookingActions({ booking }: { booking: Booking }) {
+export function BookingActions({
+  booking,
+}: BookingActionsProps) {
   const mutation = useUpdateBookingStatus();
-  const actions = nextActions[booking.status];
 
-  if (!actions) return <span className="text-sm text-muted-foreground">—</span>;
+  const handleStatusChange = (status: BookingStatus) => {
+    mutation.mutate({
+      id: booking.id,
+      status,
+    });
+  };
 
-  return (
-    <div className="flex gap-2 justify-end">
-      {actions.map((action) => (
+  // REQUESTED → ACCEPTED / DECLINED
+  if (booking.status === "REQUESTED") {
+    return (
+      <div className="flex gap-2">
         <Button
-          key={action.next}
-          size="sm"
-          variant={action.variant ?? "default"}
+          onClick={() =>
+            handleStatusChange("ACCEPTED")
+          }
           disabled={mutation.isPending}
-          onClick={() => mutation.mutate({ id: booking.id, status: action.next })}
         >
-          {action.label}
+          Accept
         </Button>
-      ))}
-    </div>
-  );
+
+        <Button
+          variant="destructive"
+          onClick={() =>
+            handleStatusChange("DECLINED")
+          }
+          disabled={mutation.isPending}
+        >
+          Decline
+        </Button>
+      </div>
+    );
+  }
+
+  // PAID → IN_PROGRESS
+  if (booking.status === "PAID") {
+    return (
+      <Button
+        className="bg-green-300"
+        onClick={() =>
+          handleStatusChange("IN_PROGRESS")
+        }
+        disabled={mutation.isPending}
+      >
+        {mutation.isPending
+          ? "Starting..."
+          : "Start Job"}
+      </Button>
+    );
+  }
+
+  // IN_PROGRESS → COMPLETED
+  if (booking.status === "IN_PROGRESS") {
+    return (
+      <Button
+        className="bg-green-300"
+        onClick={() =>
+          handleStatusChange("COMPLETED")
+        }
+        disabled={mutation.isPending}
+      >
+        {mutation.isPending
+          ? "Completing..."
+          : "Complete Job"}
+      </Button>
+    );
+  }
+
+  // ACCEPTED, DECLINED, CANCELLED, COMPLETED
+  // have no technician action here.
+  return null;
 }
