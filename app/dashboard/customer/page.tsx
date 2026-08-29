@@ -26,14 +26,12 @@ export default function CustomerDashboard() {
     data: bookings,
     isLoading,
     isError,
-    error,
+    
   } = useMyBookings();
 
   const cancelMutation = useCancelBooking();
   const { data: payments, isLoading: paymentsLoading } = usePaymentHistory();
 
-  console.log("Customer bookings:", bookings);
-  console.log("Booking error:", error);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 space-y-6">
