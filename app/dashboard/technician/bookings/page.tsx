@@ -4,51 +4,105 @@ import { useIncomingBookings } from "@/hooks/useTechnicianDashboard";
 import { StatusBadge } from "@/components/features/booking/StatusBadge";
 import { BookingActions } from "@/components/features/technician/BookingActions";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
 
 export default function TechnicianBookingsPage() {
-  const { data: bookings, isLoading, isError, error } = useIncomingBookings();
+  const {
+    data: bookings = [],
+    isLoading,
+    isError,
+  } = useIncomingBookings();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <p className="text-red-500">
+        Failed to load bookings.
+      </p>
+    );
+  }
+
+  if (bookings.length === 0) {
+    return (
+      <div className="rounded-lg border p-8 text-center">
+        <p className="font-medium">
+          No bookings yet
+        </p>
+
+        <p className="mt-1 text-sm text-muted-foreground">
+          New customer booking requests will appear here.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 space-y-6">
-      <h1 className="text-xl font-semibold">Booking Requests</h1>
+    <div className="space-y-4">
+      {bookings.map((booking) => (
+        <div
+          key={booking.id}
+          className="rounded-lg border p-5 space-y-4"
+        >
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="font-semibold">
+                {booking.service?.title}
+              </h3>
 
-      {isLoading && <Skeleton className="h-64 w-full" />}
+              <p className="text-sm text-muted-foreground">
+                Customer:{" "}
+                {booking.customer?.name ?? "Customer"}
+              </p>
+            </div>
 
-      {isError && (
-        <p className="text-red-600">Could not load bookings: {error.message}</p>
-      )}
+            <StatusBadge status={booking.status} />
+          </div>
 
-      {bookings && bookings.length === 0 && (
-        <p className="text-muted-foreground">No bookings yet.</p>
-      )}
+          <div className="text-sm space-y-1">
+            <p>
+              <strong>Date:</strong>{" "}
+              {new Date(
+                booking.scheduledAt
+              ).toLocaleDateString()}
+            </p>
 
-      {bookings && bookings.length > 0 && (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Service</TableHead>
-              <TableHead>Scheduled</TableHead>
-              <TableHead>Address</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {bookings.map((b) => (
-              <TableRow key={b.id}>
-                <TableCell>{b.service?.title ?? b.serviceId}</TableCell>
-                <TableCell>{new Date(b.scheduledAt).toLocaleString()}</TableCell>
-                <TableCell className="max-w-50 truncate">{b.address}</TableCell>
-                <TableCell><StatusBadge status={b.status} /></TableCell>
-                <TableCell><BookingActions booking={b} /></TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
+            <p>
+              <strong>Time:</strong>{" "}
+              {new Date(
+                booking.scheduledAt
+              ).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </p>
+
+            <p>
+              <strong>Address:</strong>{" "}
+              {booking.address}
+            </p>
+
+            {booking.notes && (
+              <p>
+                <strong>Notes:</strong>{" "}
+                {booking.notes}
+              </p>
+            )}
+          </div>
+
+          <BookingActions booking={booking} />
+        </div>
+      ))}
     </div>
   );
 }
+
+
+
