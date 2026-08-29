@@ -11,10 +11,24 @@ export interface TechnicianProfile {
   hourlyRate?: number;
 }
 
+export type DayOfWeek =
+  | "MONDAY"
+  | "TUESDAY"
+  | "WEDNESDAY"
+  | "THURSDAY"
+  | "FRIDAY"
+  | "SATURDAY"
+  | "SUNDAY";
+
 export interface WeeklyHours {
-  day: "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT" | "SUN";
-  start: string; // "09:00"
-  end: string;   // "17:00"
+  dayOfWeek: DayOfWeek;
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
+}
+
+export interface AvailabilityPayload {
+  slots: WeeklyHours[];
 }
 
 export function getMyProfile() {
@@ -28,70 +42,57 @@ export function updateMyProfile(payload: Partial<TechnicianProfile>) {
   });
 }
 
-export function getMyAvailability() {
-  return apiFetch<WeeklyHours[]>("/technician/availability");
+
+
+export async function getMyAvailability(): Promise<WeeklyHours[]> {
+  const response = await apiFetch<ApiResponse<WeeklyHours[]>>(
+    "/technicians/availability"
+  );
+
+  return response.data;
 }
 
-export function setAvailability(payload: WeeklyHours) {
-  return apiFetch<WeeklyHours>("/technician/availability", {
-    method: "POST",
-    body: payload,
-  });
+
+
+export async function setAvailability(
+  slots: WeeklyHours[]
+): Promise<WeeklyHours[]> {
+  const response = await apiFetch<ApiResponse<WeeklyHours[]>>(
+    "/technicians/availability",
+    {
+      method: "PUT",
+      body: {
+        slots,
+      },
+    }
+  );
+
+  return response.data;
 }
 
-// ⚠️ assumed — confirm your delete route matches
-export function removeAvailabilitySlot(day: string) {
-  return apiFetch<void>(`/technician/availability/${day}`, { method: "DELETE" });
-}
 
-// export async function getMyIncomingBookings(): Promise<Booking[]> {
-//   const response = await apiFetch<ApiResponse<Booking[]> | Booking[]>(
-//     "/technician/bookings"
-//   );
 
-//   return Array.isArray(response) ? response : response.data;
-// }
-// export async function getMyIncomingBookings(): Promise<Booking[]> {
-//   const response = await apiFetch<ApiResponse<Booking[]> | Booking[]>(
-//     "/bookings/technician"
-//   );
-
-//   return Array.isArray(response) ? response : response.data;
-// }
 
 export async function getMyIncomingBookings(): Promise<Booking[]> {
-  const response = await apiFetch<ApiResponse<Booking[]> | Booking[]>(
+  const response = await apiFetch<ApiResponse<Booking[]>>(
     "/bookings/technician/bookings"
   );
 
-  return Array.isArray(response)
-    ? response
-    : response.data;
+  return response.data;
 }
 
-// export function updateBookingStatus(id: string, status: BookingStatus) {
-//   return apiFetch<Booking>(`/technician/bookings/${id}`, {
-//     method: "PATCH",
-//     body: { status },
-//   });
-// }
 
-// export function updateBookingStatus(id: string, status: BookingStatus) {
-//   return apiFetch<Booking>(`/bookings/${id}/status`, {
-//     method: "PATCH",
-//     body: { status },
-//   });
-// }
-
-export function updateBookingStatus(
+export async function updateBookingStatus(
   id: string,
   status: BookingStatus
-) {
-  return apiFetch<Booking>(
+): Promise<Booking> {
+  const response = await apiFetch<ApiResponse<Booking>>(
     `/bookings/${id}/status`,
     {
       method: "PATCH",
       body: { status },
     }
   );
+
+  return response.data;
 }
