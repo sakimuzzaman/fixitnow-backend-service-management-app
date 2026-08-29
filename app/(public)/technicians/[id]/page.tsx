@@ -69,6 +69,12 @@ export default function TechnicianProfilePage() {
     router.push(
       `/dashboard/customer/bookings/new?serviceId=${serviceId}&technicianId=${id}&date=${selectedSlot.date}&time=${selectedSlot.time}`
     );
+
+//     router.push(
+//   `/dashboard/customer/bookings/new?serviceId=${serviceId}&date=${selectedSlot.date}&time=${selectedSlot.time}`
+// );
+
+
   }
 
   if (loadingTech) {
@@ -128,7 +134,7 @@ export default function TechnicianProfilePage() {
         <div>
           <h2 className="mb-2 font-semibold">Skills</h2>
           <div className="flex flex-wrap gap-2">
-            {technician.skills.map((skill) => (
+            {technician.skills.map((skill : any) => (
               <span key={skill} className="rounded-full bg-muted px-3 py-1 text-sm">{skill}</span>
             ))}
           </div>
