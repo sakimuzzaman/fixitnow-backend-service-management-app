@@ -23,6 +23,7 @@ export default function NewBookingPage() {
   const router = useRouter();
 
   const serviceId = params.get("serviceId")!;
+  const technicianId = params.get("technicianId")!;
   const date = params.get("date")!; // "2026-08-20"
   const time = params.get("time")!; // "10:00"
 
@@ -45,7 +46,7 @@ console.log("=============================================");
 
   const mutation = useMutation({
     mutationFn: (values: FormValues) =>
-      createBooking({ serviceId, scheduledAt, ...values }),
+      createBooking({ serviceId, technicianId, scheduledAt, ...values }),
     onSuccess: () => {
       toast.success("Booking requested! Waiting for technician confirmation.");
       router.push("/dashboard/customer");
