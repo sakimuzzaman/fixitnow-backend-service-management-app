@@ -1,36 +1,226 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FixItNow Frontend
 
-## Getting Started
+FixItNow is a role-based home-service marketplace frontend. Customers can
+discover services, choose a technician and available time slot, make a secure
+Stripe payment, track bookings, and leave a review. Technicians can manage
+their profile, services, availability, and incoming jobs. Administrators can
+monitor platform activity, manage users, and maintain service categories.
 
-First, run the development server:
+The application is built with the Next.js App Router and connects to the
+FixItNow backend through a configurable REST API.
+
+## Highlights
+
+- Public service catalogue with category, location, price, and rating filters.
+- Technician profile pages with service details and available booking slots.
+- Customer booking lifecycle: request, pay for accepted work, track status,
+  cancel eligible bookings, and leave reviews after completion.
+- Stripe Elements payment flow with dedicated success and cancellation pages.
+- Technician workspace for profile setup, service listing, weekly availability,
+  and booking status actions.
+- Admin workspace for platform statistics, user ban/unban actions, and category
+  management.
+- Role-aware navigation and protected dashboard routes for customers,
+  technicians, and administrators.
+- Responsive UI, loading skeletons, toast feedback, and API error handling.
+
+## Technology
+
+| Area | Tools |
+| --- | --- |
+| Framework | Next.js 15, React 19, TypeScript |
+| Styling and UI | Tailwind CSS, shadcn/ui, Base UI, Lucide icons |
+| Server state | TanStack React Query |
+| Forms and validation | React Hook Form, Zod |
+| Client state | Zustand and browser cookies |
+| Payments | Stripe Elements (`@stripe/react-stripe-js`) |
+| Authentication | JWT bearer token, `jose`, route middleware |
+
+## Prerequisites
+
+Before running the project, install:
+
+- Node.js 20 LTS or newer
+- npm (included with Node.js)
+- A running FixItNow backend API
+- A Stripe publishable key for payment testing
+
+## Getting started
+
+### 1. Clone the repository
+
+```bash
+git clone <your-repository-url>
+cd fixitnow-frontend
+```
+
+If this frontend lives inside a larger repository, change into the
+`fixitnow-frontend` directory before continuing.
+
+### 2. Install dependencies
+
+```bash
+npm ci
+```
+
+Use `npm install` only when you intentionally need to update dependencies or
+the lockfile is unavailable.
+
+### 3. Configure environment variables
+
+Create a `.env` file in the project root:
+
+```env
+# Backend base URL. Include /api when the backend exposes that prefix.
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+
+# Stripe publishable key used by Stripe Elements in the payment page.
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key
+
+# Must match the JWT signing secret used by the backend in local development.
+# Required because middleware verifies the dashboard token before rendering.
+JWT_SECRET=replace_with_your_backend_jwt_secret
+```
+
+Do not commit `.env` files or real credentials. `NEXT_PUBLIC_*` values are
+deliberately exposed to the browser; only use Stripe's publishable key there,
+never a Stripe secret key. Configure production secrets through your hosting
+provider's environment-variable settings.
+
+### 4. Start the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 5. Create or use test accounts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Register through `/auth/register` and choose one of these roles:
 
-## Learn More
+| Role | What to review |
+| --- | --- |
+| Customer | Browse services, choose a time slot, request a booking, pay after acceptance, and submit a review. |
+| Technician | Complete profile details, add services, set availability, and accept, decline, start, or complete bookings. |
+| Admin | View platform metrics, manage user status, and create, edit, or delete categories. |
 
-To learn more about Next.js, take a look at the following resources:
+> The backend controls authorization. Ensure the backend has suitable test
+> data and role permissions before reviewing protected workflows.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Available scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Starts the development server with Turbopack. |
+| `npm run lint` | Runs ESLint checks. |
+| `npm run build` | Creates an optimized production build. |
+| `npm run start` | Serves the production build after `npm run build`. |
 
-## Deploy on Vercel
+For a production-like local check:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run build
+npm run start
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## User journeys
+
+### Customer
+
+1. Register or sign in as a customer.
+2. Browse and filter services, then open a technician profile.
+3. Select an available time slot and submit the booking address and notes.
+4. When the technician accepts the request, select **Pay Now**.
+5. Complete payment through Stripe Elements and return to the success page.
+6. Track the booking in the customer dashboard and leave a review after the
+   technician marks it completed.
+
+### Technician
+
+1. Register or sign in as a technician.
+2. Set up the profile, service listings, and weekly availability.
+3. Review incoming requests and accept or decline them.
+4. After customer payment, start the job and mark it completed when finished.
+
+### Administrator
+
+1. Sign in with an administrator account.
+2. Review user and booking totals on the dashboard.
+3. Search users and change their status between `ACTIVE` and `BANNED`.
+4. Create, rename, and delete service categories.
+
+## Routes
+
+| Area | Routes |
+| --- | --- |
+| Public | `/`, `/services`, `/technicians/[id]` |
+| Authentication | `/auth/register`, `/auth/login` |
+| Customer | `/dashboard/customer`, `/dashboard/customer/bookings/new`, `/dashboard/customer/bookings/[id]/pay`, `/dashboard/customer/bookings/[id]/review` |
+| Technician | `/dashboard/technician`, `/dashboard/technician/profile`, `/dashboard/technician/services`, `/dashboard/technician/services/new`, `/dashboard/technician/bookings` |
+| Admin | `/dashboard/admin`, `/dashboard/admin/users`, `/dashboard/admin/categories` |
+| Payments | `/payment/success`, `/payment/cancel` |
+
+## Architecture
+
+```text
+app/                 Pages, layouts, route-level loading/error UI
+components/          Feature, shared, and reusable UI components
+hooks/               React Query queries and mutations
+lib/api/             Typed backend endpoint wrappers and shared fetcher
+lib/auth/            Session-token cookie helpers
+store/               Zustand authentication state
+middleware.ts        Server-side dashboard route and role verification
+```
+
+### Data and authentication flow
+
+1. `lib/api/fetcher.ts` builds requests from `NEXT_PUBLIC_API_URL`.
+2. When a session token exists, it sends `Authorization: Bearer <token>`.
+3. `app/providers.tsx` restores the session with `GET /auth/me` and provides
+   React Query plus global toast notifications.
+4. `middleware.ts` checks dashboard access before a protected page loads, while
+   `RoleGuard` verifies the current role client-side.
+5. React Query caches server data, refreshes lists after mutations, and uses
+   optimistic UI updates for technician booking-status and admin user-status
+   changes.
+
+## API integration
+
+The endpoint-to-component mapping is maintained in
+[API_INTEGRATION.md](./API_INTEGRATION.md). It documents public,
+authentication, customer, technician, and admin API calls, plus the shared
+Stripe payment flow.
+
+## Booking statuses
+
+```text
+REQUESTED -> ACCEPTED -> PAID -> IN_PROGRESS -> COMPLETED
+     |           |
+     |           +-> CANCELLED
+     +-> DECLINED
+     +-> CANCELLED
+```
+
+The UI only exposes actions that match the current state: technicians can
+accept or decline requested work, start paid work, and complete work in
+progress; customers can pay accepted bookings and review completed bookings.
+
+## Troubleshooting
+
+| Problem | Check |
+| --- | --- |
+| Services or dashboards cannot load | Confirm `NEXT_PUBLIC_API_URL`, start the backend, and verify its CORS configuration allows the frontend origin. |
+| Redirected to login from a dashboard | Sign in again and confirm `JWT_SECRET` matches the backend token-signing secret in the current environment. |
+| Payment page says it is unavailable | Set `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` and use a valid Stripe test key in local development. |
+| Payment cannot be created or confirmed | Verify the backend payment endpoints and Stripe credentials are configured, and use an accepted booking. |
+| Build or lint failure | Run `npm ci`, then run `npm run lint` or `npm run build` again to view the exact error. |
+
+## Client review checklist
+
+- Verify the public service search and filters.
+- Review the interface at desktop and mobile widths.
+- Use separate customer, technician, and admin accounts to verify each portal.
+- Confirm booking status changes appear promptly after an action.
+- Test a Stripe test-mode payment only with backend-provided test credentials.
+- Review the API mapping in [API_INTEGRATION.md](./API_INTEGRATION.md).
