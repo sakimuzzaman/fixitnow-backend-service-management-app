@@ -161,17 +161,113 @@ npm run start
 | Admin | `/dashboard/admin`, `/dashboard/admin/users`, `/dashboard/admin/categories` |
 | Payments | `/payment/success`, `/payment/cancel` |
 
-## Architecture
+## Project structure
 
 ```text
-app/                 Pages, layouts, route-level loading/error UI
-components/          Feature, shared, and reusable UI components
-hooks/               React Query queries and mutations
-lib/api/             Typed backend endpoint wrappers and shared fetcher
-lib/auth/            Session-token cookie helpers
-store/               Zustand authentication state
-middleware.ts        Server-side dashboard route and role verification
+fixitnow-frontend/
+├── app/
+│   ├── (auth)/
+│   │   └── auth/
+│   │       ├── login/page.tsx                 # Sign-in page
+│   │       └── register/page.tsx              # Role-based registration
+│   ├── (public)/
+│   │   ├── services/page.tsx                  # Service catalogue
+│   │   └── technicians/[id]/page.tsx          # Technician profile and booking CTA
+│   ├── dashboard/
+│   │   ├── admin/
+│   │   │   ├── categories/page.tsx            # Category management
+│   │   │   ├── users/page.tsx                 # User management
+│   │   │   ├── layout.tsx                     # Admin role guard
+│   │   │   └── page.tsx                       # Admin overview
+│   │   ├── customer/
+│   │   │   ├── bookings/
+│   │   │   │   ├── [id]/pay/page.tsx          # Stripe payment page
+│   │   │   │   ├── [id]/review/page.tsx       # Review submission page
+│   │   │   │   └── new/page.tsx               # Booking confirmation form
+│   │   │   ├── layout.tsx                     # Customer role guard
+│   │   │   └── page.tsx                       # Bookings and payment history
+│   │   └── technician/
+│   │       ├── bookings/page.tsx              # Incoming booking management
+│   │       ├── profile/page.tsx               # Technician profile editor
+│   │       ├── services/
+│   │       │   ├── new/page.tsx               # New-service form
+│   │       │   └── page.tsx                   # Technician service list
+│   │       ├── layout.tsx                     # Technician role guard
+│   │       └── page.tsx                       # Technician overview
+│   ├── payment/
+│   │   ├── cancel/page.tsx                    # Cancelled payment state
+│   │   └── success/page.tsx                   # Payment confirmation state
+│   ├── error.tsx                              # Route error fallback
+│   ├── favicon.ico
+│   ├── globals.css                            # Global Tailwind styles
+│   ├── layout.tsx                             # Root layout and navigation
+│   ├── not-found.tsx                          # 404 page
+│   ├── page.tsx                               # Home page
+│   └── providers.tsx                          # React Query and session initialization
+├── components/
+│   ├── features/
+│   │   ├── admin/CategoryDialog.tsx
+│   │   ├── booking/{StatusBadge,TimeSlotPicker}.tsx
+│   │   ├── payment/{CheckoutForm,StripeProvider}.tsx
+│   │   ├── review/StarRating.tsx
+│   │   ├── service/{ServiceCard,ServiceCardSkeleton,Services}.tsx
+│   │   └── technician/
+│   │       ├── availability/page.tsx
+│   │       ├── AvailabilityForm.tsx
+│   │       └── BookingActions.tsx
+│   ├── shared/{Navbar,RoleGuard}.tsx
+│   └── ui/
+│       ├── badge.tsx
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── dialog.tsx
+│       ├── input.tsx
+│       ├── label.tsx
+│       ├── select.tsx
+│       ├── skeleton.tsx
+│       ├── sonner.tsx
+│       ├── table.tsx
+│       └── textarea.tsx                      # Reusable shadcn/UI primitives
+├── hooks/
+│   ├── useAdmin.ts                           # Admin queries and mutations
+│   ├── useBookings.ts                        # Customer booking queries and mutations
+│   ├── usePayments.ts                        # Payment history query
+│   ├── useServices.ts                        # Service and category queries
+│   ├── useTechnician.ts                      # Public technician queries
+│   └── useTechnicianDashboard.ts             # Technician dashboard operations
+├── lib/
+│   ├── api/
+│   │   ├── admin.ts                          # Admin endpoint wrappers
+│   │   ├── auth.ts                           # Authentication endpoint wrappers
+│   │   ├── bookings.ts                       # Booking endpoint wrappers
+│   │   ├── fetcher.ts                        # Shared HTTP client and ApiError
+│   │   ├── payment.ts                        # Stripe payment endpoint wrappers
+│   │   ├── reviews.ts                        # Review endpoint wrapper
+│   │   ├── services.ts                       # Service and public category endpoints
+│   │   ├── technician.ts                     # Technician dashboard endpoints
+│   │   └── technicians.ts                    # Public technician endpoints
+│   ├── auth/token.ts                         # Browser cookie token helpers
+│   ├── validators/auth.ts                    # Zod authentication schemas
+│   └── utils.ts                              # Shared utility functions
+├── store/
+│   └── authStore.ts                          # Zustand authentication store
+├── public/                                   # Static public assets (currently empty)
+├── .env                                      # Local environment variables (not committed)
+├── .gitignore                                # Git ignore rules
+├── API_INTEGRATION.md                        # Frontend-to-backend endpoint map
+├── components.json                           # shadcn/ui configuration
+├── eslint.config.mjs                         # ESLint configuration
+├── middleware.ts                             # Dashboard JWT and role verification
+├── next.config.ts                            # Next.js configuration
+├── package.json                              # Scripts and dependencies
+├── package-lock.json                         # Locked dependency versions
+├── postcss.config.mjs                        # PostCSS/Tailwind configuration
+├── README.md                                 # Project documentation
+└── tsconfig.json                             # TypeScript configuration
 ```
+
+Generated folders such as `node_modules/` and `.next/` are intentionally
+excluded from this tree.
 
 ### Data and authentication flow
 
