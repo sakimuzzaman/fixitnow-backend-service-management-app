@@ -134,7 +134,7 @@ export default function TechnicianProfilePage() {
         <div>
           <h2 className="mb-2 font-semibold">Skills</h2>
           <div className="flex flex-wrap gap-2">
-            {technician.skills.map((skill : any) => (
+            {technician.skills.map((skill) => (
               <span key={skill} className="rounded-full bg-muted px-3 py-1 text-sm">{skill}</span>
             ))}
           </div>
@@ -197,3 +197,4 @@ export default function TechnicianProfilePage() {
     </div>
   );
 }
+

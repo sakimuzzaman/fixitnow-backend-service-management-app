@@ -25,10 +25,6 @@ const DAYS: DayOfWeek[] = [
   "SUNDAY",
 ];
 
-type DraftAvailability = {
-  start: string;
-  end: string;
-};
 
 export function AvailabilityForm() {
   const { data: availability = [], isLoading } =

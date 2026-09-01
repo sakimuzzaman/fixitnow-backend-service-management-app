@@ -8,17 +8,6 @@ export interface Category {
 
 
 
-// export interface Service {
-//   id: string;
-//   title: string;
-//   description: string;
-//   price: number;
-//   duration: number;
-//   location: string;
-//   categoryId: string;
-//   technicianId: string;
-//   images?: string[];
-// }
 
 export interface PaginationMeta {
   total: number;
@@ -27,10 +16,7 @@ export interface PaginationMeta {
   totalPages: number;
 }
 
-// export interface ServicesData {
-//   data: Service[];
-//   meta: PaginationMeta;
-// }
+
 
 export interface CreateServicePayload {
   title: string;
@@ -122,14 +108,7 @@ function buildQuery(filters: ServiceFilters) {
 }
 
 
-// export function getServices(filters: ServiceFilters = {}) {
-//   return apiFetch<ApiResponse<ServicesData>>(
-//     `/services${buildQuery(filters)}`,
-//     {
-//       auth: false,
-//     }
-//   );
-// }
+
 export function getServices(filters: ServiceFilters = {}) {
   return apiFetch<ApiResponse<Service[], PaginationMeta>>(
     `/services${buildQuery(filters)}`,

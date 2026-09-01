@@ -4,7 +4,6 @@ import {
   updateMyProfile,
   getMyAvailability,
   setAvailability,
-  removeAvailabilitySlot,
   getMyIncomingBookings,
   updateBookingStatus,
   WeeklyHours,
@@ -42,12 +41,12 @@ export function useMyAvailability() {
   });
 }
 
+
 export function useSetAvailability() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: WeeklyHours) =>
-      setAvailability(payload),
+    mutationFn: (slots: WeeklyHours[]) => setAvailability(slots),
 
     onSuccess: () => {
       toast.success("Availability saved");
@@ -56,24 +55,32 @@ export function useSetAvailability() {
         queryKey: ["technician-availability-mine"],
       });
     },
-  });
-}
 
-export function useRemoveAvailabilitySlot() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: removeAvailabilitySlot,
-
-    onSuccess: () => {
-      toast.success("Availability removed");
-
-      queryClient.invalidateQueries({
-        queryKey: ["technician-availability-mine"],
-      });
+    onError: (error) => {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to save availability"
+      );
     },
   });
 }
+
+// export function useRemoveAvailabilitySlot() {
+//   const queryClient = useQueryClient();
+
+//   return useMutation({
+//     mutationFn: removeAvailabilitySlot,
+
+//     onSuccess: () => {
+//       toast.success("Availability removed");
+
+//       queryClient.invalidateQueries({
+//         queryKey: ["technician-availability-mine"],
+//       });
+//     },
+//   });
+// }
 
 
 
@@ -84,6 +91,8 @@ export function useIncomingBookings() {
     queryFn: getMyIncomingBookings,
   });
 }
+
+
 
 export function useUpdateBookingStatus() {
   const queryClient = useQueryClient();
@@ -102,10 +111,9 @@ export function useUpdateBookingStatus() {
         queryKey: ["technician-bookings"],
       });
 
-      const previous =
-        queryClient.getQueryData<Booking[]>([
-          "technician-bookings",
-        ]);
+      const previous = queryClient.getQueryData<Booking[]>([
+        "technician-bookings",
+      ]);
 
       queryClient.setQueryData<Booking[]>(
         ["technician-bookings"],
@@ -125,7 +133,7 @@ export function useUpdateBookingStatus() {
 
     onError: (_error, _variables, context) => {
       if (context?.previous) {
-        queryClient.setQueryData<Booking[]>(
+        queryClient.setQueryData(
           ["technician-bookings"],
           context.previous
         );
@@ -141,6 +149,10 @@ export function useUpdateBookingStatus() {
     onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: ["technician-bookings"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["bookings"],
       });
     },
   });

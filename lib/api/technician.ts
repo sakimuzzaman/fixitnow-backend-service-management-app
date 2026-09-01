@@ -21,6 +21,7 @@ export type DayOfWeek =
   | "SUNDAY";
 
 export interface WeeklyHours {
+  id?: string;
   dayOfWeek: DayOfWeek;
   startTime: string;
   endTime: string;
@@ -32,12 +33,12 @@ export interface AvailabilityPayload {
 }
 
 export function getMyProfile() {
-  return apiFetch<TechnicianProfile>("/technician/profile");
+  return apiFetch<TechnicianProfile>("/technician/profile/me");
 }
 
 export function updateMyProfile(payload: Partial<TechnicianProfile>) {
   return apiFetch<TechnicianProfile>("/technician/profile", {
-    method: "PATCH",
+    method: "PUT",
     body: payload,
   });
 }

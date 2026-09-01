@@ -79,7 +79,7 @@ export default function TechnicianServicesPage() {
           </p>
         </div>
 
-        <Button>
+        <Button className="bg-cyan-400">
           <Link href="/dashboard/technician/services/new">
             + Add Service
           </Link>
@@ -226,22 +226,12 @@ export default function TechnicianServicesPage() {
                     )}
                   </div>
 
-                  <div className="mt-auto flex gap-2 pt-5">
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      
-                    >
-                      <Link
-                        href={`/dashboard/technician/services/${service.id}/edit`}
-                      >
-                        Edit
-                      </Link>
-                    </Button>
+                  <div className="flex justify-end gap-2 pt-5">
+                   
 
                     <Button
                       variant="destructive"
-                      className="flex-1"
+                      className="bg-red-500"
                       disabled={deletingId === service.id}
                       onClick={() =>
                         handleDelete(service.id)

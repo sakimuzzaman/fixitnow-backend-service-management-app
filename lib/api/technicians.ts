@@ -70,12 +70,6 @@ export interface AvailabilityDay {
 }
 
 
-// export function getTechnicianAvailability(technicianId: string) {
-//   return apiFetch<AvailabilityDay[]>(
-//     `/technicians/${technicianId}/availability`,
-//     { auth: false }
-//   );
-// }
 
 
 export function getTechnicianAvailability(technicianId: string) {
