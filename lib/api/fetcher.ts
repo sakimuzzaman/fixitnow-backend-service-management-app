@@ -5,6 +5,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 export class ApiError extends Error {
   status: number;
   data: unknown;
+
   constructor(message: string, status: number, data?: unknown) {
     super(message);
     this.status = status;
@@ -14,7 +15,7 @@ export class ApiError extends Error {
 
 type FetchOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
-  auth?: boolean; // attach Authorization header, default true
+  auth?: boolean;
 };
 
 export interface ApiResponse<T, M = undefined> {
@@ -31,26 +32,35 @@ export async function apiFetch<T>(
   const { body, auth = true, headers, ...rest } = options;
 
   const finalHeaders: HeadersInit = {
-    "Content-Type": "application/json",
     ...headers,
   };
 
+  // Only send JSON Content-Type when there is actually a request body
+  if (body !== undefined) {
+    (finalHeaders as Record<string, string>)["Content-Type"] =
+      "application/json";
+  }
+
   if (auth) {
     const token = getToken();
+
     if (token) {
-      (finalHeaders as Record<string, string>).Authorization = `Bearer ${token}`;
+      (finalHeaders as Record<string, string>).Authorization =
+        `Bearer ${token}`;
     }
   }
 
   const res = await fetch(`${BASE_URL}${path}`, {
     ...rest,
     headers: finalHeaders,
-    body: body ? JSON.stringify(body) : undefined,
-    cache: "no-store", // override per-call for public GETs you want cached
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+    cache: "no-store",
   });
 
   let data: unknown = null;
+
   const text = await res.text();
+
   if (text) {
     try {
       data = JSON.parse(text);
@@ -61,11 +71,11 @@ export async function apiFetch<T>(
 
   if (!res.ok) {
     const message =
-      (data as { message?: string })?.message || `Request failed (${res.status})`;
+      (data as { message?: string })?.message ||
+      `Request failed (${res.status})`;
+
     throw new ApiError(message, res.status, data);
   }
 
   return data as T;
 }
-
-
